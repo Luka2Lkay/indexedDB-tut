@@ -33,3 +33,33 @@ openRequest.addEventListener("error", () =>
   
     console.log("Database setup complete");
   });
+
+  form.addEventListener("submit", addData);
+
+  function addData(e) {
+
+    e.preventDefault();
+  
+    const newItem = { title: titleInput.value, body: bodyInput.value };
+  
+    const transaction = db.transaction(["notes_os"], "readwrite");
+    const objectStore = transaction.objectStore("notes_os");
+  
+    const addRequest = objectStore.add(newItem);
+  
+    addRequest.addEventListener("success", () => {
+      titleInput.value = "";
+      bodyInput.value = "";
+    });
+
+  transaction.addEventListener("complete", () => {
+    console.log("Transaction completed: database modification finished.");
+
+    displayData();
+  });
+
+  transaction.addEventListener("error", () =>
+    console.log("Transaction not opened due to error"),
+  );
+}
+  
