@@ -106,3 +106,27 @@ function displayData() {
     }
   });
 }
+
+// Define the deleteItem() function
+function deleteItem(e) {
+ 
+  const noteId = Number(e.target.parentNode.getAttribute("data-note-id"));
+
+  const transaction = db.transaction(["notes_os"], "readwrite");
+  const objectStore = transaction.objectStore("notes_os");
+  
+  objectStore.delete(noteId);
+
+  
+  transaction.addEventListener("complete", () => {
+
+    e.target.parentNode.parentNode.removeChild(e.target.parentNode);
+    console.log(`Note ${noteId} deleted.`);
+
+    if (!list.firstChild) {
+      const listItem = document.createElement("li");
+      listItem.textContent = "No notes stored.";
+      list.appendChild(listItem);
+    }
+  });
+}
