@@ -41,10 +41,8 @@ openRequest.addEventListener("error", () =>
     e.preventDefault();
   
     const newItem = { title: titleInput.value, body: bodyInput.value };
-  
     const transaction = db.transaction(["notes_os"], "readwrite");
     const objectStore = transaction.objectStore("notes_os");
-  
     const addRequest = objectStore.add(newItem);
   
     addRequest.addEventListener("success", () => {
@@ -62,4 +60,49 @@ openRequest.addEventListener("error", () =>
     console.log("Transaction not opened due to error"),
   );
 }
-  
+
+function displayData() {
+
+  while (list.firstChild) {
+    list.removeChild(list.firstChild);
+  }
+
+  const objectStore = db.transaction("notes_os").objectStore("notes_os");
+
+  objectStore.openCursor().addEventListener("success", (e) => {
+    const cursor = e.target.result;
+
+    if (cursor) {
+
+      const listItem = document.createElement("li");
+      const h3 = document.createElement("h3");
+      const para = document.createElement("p");
+
+      listItem.appendChild(h3);
+      listItem.appendChild(para);
+      list.appendChild(listItem);
+
+      h3.textContent = cursor.value.title;
+      para.textContent = cursor.value.body;
+
+      listItem.setAttribute("data-note-id", cursor.value.id);
+
+      const deleteBtn = document.createElement("button");
+      listItem.appendChild(deleteBtn);
+      deleteBtn.textContent = "Delete";
+
+      deleteBtn.addEventListener("click", deleteItem);
+
+      cursor.continue();
+    } else {
+
+      if (!list.firstChild) {
+        const listItem = document.createElement("li");
+        listItem.textContent = "No notes stored.";
+        list.appendChild(listItem);
+      }
+      
+      console.log("Notes all displayed");
+    }
+  });
+}
